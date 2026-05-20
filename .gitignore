@@ -1,0 +1,14 @@
+# Entorno virtual y caché
+venv/
+.venv/
+__pycache__/
+*.pyc
+
+# Configuración y secretos
+.env
+
+# Persistencia local (SQLite)
+asistente_memoria.db
+
+# Reportes generados (Excel)
+reports/*.xlsx
