@@ -30,11 +30,13 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     welcome_text = (
         f"👋 ¡Hola {user.first_name}! Bienvenido a tu **Asistente de IA Privado 24/7**.\n\n"
-        "Estoy listo para ayudarte localmente en dos áreas clave:\n"
+        "Estoy listo para ayudarte localmente en tres áreas clave:\n"
         "💵 **Finanzas Personales**: Registra tus gastos en lenguaje natural (ej. *'gasté 25 en transporte'*) o "
         "pídeme reportes en Excel (*'genera un reporte de mis gastos'*).\n"
         "📅 **Agenda Personal**: Consulta disponibilidad (*'¿qué tengo programado hoy?'*) o "
-        "agenda eventos (*'reunión de trabajo mañana a las 11:00'*).\n\n"
+        "agenda eventos (*'reunión de trabajo mañana a las 11:00'*).\n"
+        "🌐 **Búsqueda Web**: Pregúntame sobre cualquier noticia o hecho actual y buscaré en internet.\n\n"
+        "📊 **Panel de Control**: También puedes visualizar tu actividad y estado en tiempo real en tu navegador web ingresando a `http://localhost:5050` (o a la IP de tu dispositivo).\n\n"
         "Todos tus datos se guardan estrictamente en tu dispositivo host local."
     )
     
@@ -98,10 +100,17 @@ async def handle_user_message(update: Update, context: ContextTypes.DEFAULT_TYPE
         )
 
 def main():
-    """Punto de entrada para inicializar y arrancar el bot de Telegram."""
+    """Punto de entrada para inicializar y arrancar el bot de Telegram y el servidor web."""
     logger.info("Inicializando base de datos local...")
     db.init_db()
     logger.info("Base de datos lista.")
+
+    logger.info("Iniciando servidor web del Panel de Control en el puerto 5050...")
+    import threading
+    from src.web import run_server
+    web_thread = threading.Thread(target=run_server, kwargs={"host": "0.0.0.0", "port": 5050}, daemon=True)
+    web_thread.start()
+    logger.info("Servidor web listo en http://0.0.0.0:5050")
 
     logger.info("Iniciando aplicación de Telegram Bot...")
     app = ApplicationBuilder().token(TELEGRAM_BOT_TOKEN).build()

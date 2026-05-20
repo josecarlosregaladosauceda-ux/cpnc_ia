@@ -124,6 +124,45 @@ def run_tests():
         
         print("OK: Agenda y calendario: Inserciones, validaciones de formato y consultas correctas.")
         
+        # --- PRUEBA 5: Búsqueda Web ---
+        print("\n[Prueba 5] Verificando Busqueda Web (DuckDuckGo)...")
+        from duckduckgo_search import DDGS
+        results = []
+        for attempt in range(3):
+            try:
+                with DDGS() as ddgs:
+                    results = list(ddgs.text("python", max_results=2))
+                if results:
+                    break
+            except Exception as search_err:
+                print(f"   Aviso: Intento {attempt + 1} de busqueda fallido ({search_err}). Reintentando...")
+        assert len(results) > 0, "ERROR: La busqueda web no retorno ningun resultado despues de 3 intentos."
+        print(f"   Log: Primer resultado: {results[0]['title']}")
+        print("OK: Busqueda web: DuckDuckGo funcionando correctamente.")
+        
+        # --- PRUEBA 6: Servidor Web Flask ---
+        print("\n[Prueba 6] Verificando Endpoints del Servidor Flask...")
+        from src.web import app
+        flask_test_client = app.test_client()
+        
+        # Probar GET /api/stats
+        res_stats = flask_test_client.get('/api/stats')
+        assert res_stats.status_code == 200, f"ERROR: /api/stats retorno codigo {res_stats.status_code}"
+        stats_json = res_stats.get_json()
+        assert stats_json["db_connected"] is True, "ERROR: La API no detecta conexion a base de datos."
+        assert stats_json["expenses"]["count"] == 3, f"ERROR: Cantidad de gastos incorrecta, esperados 3, obtenidos {stats_json['expenses']['count']}"
+        
+        # Probar GET /api/expenses
+        res_exp = flask_test_client.get('/api/expenses')
+        assert res_exp.status_code == 200, f"ERROR: /api/expenses retorno codigo {res_exp.status_code}"
+        assert len(res_exp.get_json()) == 3, "ERROR: Deberian haber 3 gastos en la lista JSON."
+        
+        # Probar GET / (Dashboard UI)
+        res_home = flask_test_client.get('/')
+        assert res_home.status_code == 200, f"ERROR: / (home) retorno codigo {res_home.status_code}"
+        
+        print("OK: Servidor Flask: Endpoints de API y plantilla HTML funcionando.")
+        
         print("\n=== TODAS LAS PRUEBAS SE COMPLETARON CON EXITO ===")
         
     except Exception as e:

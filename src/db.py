@@ -1,4 +1,5 @@
 import sqlite3
+import contextlib
 from datetime import datetime
 from src.config import DB_PATH
 
@@ -11,7 +12,7 @@ def get_connection():
 
 def init_db():
     """Inicializa la base de datos y crea las tablas si no existen."""
-    with get_connection() as conn:
+    with contextlib.closing(get_connection()) as conn:
         cursor = conn.cursor()
         
         # Tabla para memoria de corto plazo (historial de chat)
@@ -51,11 +52,12 @@ def init_db():
 
 def add_chat_message(user_id: int, role: str, content: str):
     """Inserta un mensaje de chat (usuario o asistente) en la base de datos."""
-    with get_connection() as conn:
+    safe_content = content if content is not None else ""
+    with contextlib.closing(get_connection()) as conn:
         cursor = conn.cursor()
         cursor.execute(
             "INSERT INTO chat_memory (user_id, role, content) VALUES (?, ?, ?)",
-            (user_id, role, content)
+            (user_id, role, safe_content)
         )
         conn.commit()
 
@@ -64,7 +66,7 @@ def get_chat_history(user_id: int, limit: int = 15) -> list:
     Obtiene los últimos 'limit' mensajes de un usuario en orden cronológico.
     Retorna una lista de diccionarios con las llaves 'role' y 'content'.
     """
-    with get_connection() as conn:
+    with contextlib.closing(get_connection()) as conn:
         cursor = conn.cursor()
         # Obtener los últimos mensajes ordenados por ID descendente
         cursor.execute(
@@ -86,7 +88,7 @@ def add_expense(category: str, concept: str, amount: float) -> str:
     clean_category = category.strip().lower()
     clean_concept = concept.strip()
     
-    with get_connection() as conn:
+    with contextlib.closing(get_connection()) as conn:
         cursor = conn.cursor()
         cursor.execute(
             "INSERT INTO expenses (category, concept, amount) VALUES (?, ?, ?)",
@@ -102,7 +104,7 @@ def search_expenses(keyword: str) -> list:
     Retorna una lista de diccionarios con el detalle de las transacciones.
     """
     query_param = f"%{keyword.strip()}%"
-    with get_connection() as conn:
+    with contextlib.closing(get_connection()) as conn:
         cursor = conn.cursor()
         cursor.execute(
             """
@@ -118,7 +120,7 @@ def search_expenses(keyword: str) -> list:
 
 def get_all_expenses() -> list:
     """Retorna todos los gastos registrados en la base de datos."""
-    with get_connection() as conn:
+    with contextlib.closing(get_connection()) as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT category, concept, amount, date_added FROM expenses ORDER BY date_added ASC")
         rows = cursor.fetchall()
@@ -139,7 +141,7 @@ def add_calendar_event(title: str, start_time: str) -> str:
     except ValueError:
         raise ValueError("El formato de fecha y hora es inválido. Debe ser estrictamente YYYY-MM-DD HH:MM (ej: 2026-05-22 15:30).")
         
-    with get_connection() as conn:
+    with contextlib.closing(get_connection()) as conn:
         cursor = conn.cursor()
         cursor.execute(
             "INSERT INTO calendar (title, start_time) VALUES (?, ?)",
@@ -163,7 +165,7 @@ def check_availability(date_str: str) -> list:
         raise ValueError("La fecha debe estar en formato YYYY-MM-DD (ej: 2026-05-22).")
         
     query_param = f"{date_clean}%"
-    with get_connection() as conn:
+    with contextlib.closing(get_connection()) as conn:
         cursor = conn.cursor()
         cursor.execute(
             "SELECT title, start_time FROM calendar WHERE start_time LIKE ? ORDER BY start_time ASC",

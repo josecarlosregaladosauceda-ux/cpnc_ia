@@ -107,6 +107,23 @@ TOOLS = [
                 "required": ["date_str"]
             }
         }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "web_search",
+            "description": "Realiza una consulta de búsqueda en internet para obtener datos, noticias, o información actualizada de la actualidad.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "La consulta de búsqueda a realizar (ej: quién ganó el partido de ayer, clima en Monterrey hoy)."
+                    }
+                },
+                "required": ["query"]
+            }
+        }
     }
 ]
 
@@ -151,6 +168,17 @@ def execute_tool(name: str, arguments: dict) -> tuple[str, dict | None]:
                     result += f"- {r['start_time'].split(' ')[1]}: {r['title']}\n"
             else:
                 result = f"No hay eventos programados para el {arguments.get('date_str')}. Estás completamente libre."
+        elif name == "web_search":
+            from duckduckgo_search import DDGS
+            query = arguments.get("query")
+            with DDGS() as ddgs:
+                results = list(ddgs.text(query, max_results=5))
+            if results:
+                result = f"Resultados de búsqueda en la web para '{query}':\n"
+                for r in results:
+                    result += f"- {r['title']}: {r['body']} (Fuente: {r['href']})\n"
+            else:
+                result = f"No se encontraron resultados para la búsqueda '{query}'."
         else:
             result = f"Error: Herramienta '{name}' no reconocida."
     except Exception as e:
@@ -176,15 +204,17 @@ def process_message_with_ai(user_id: int, user_message: str) -> tuple[str, list[
     # Inyección de instrucciones del sistema
     system_prompt = (
         "Eres un Asistente Personal de IA Privado y Local, diseñado para ejecutarse 24/7 en un servidor perimetral local.\n"
-        "Tus dos funciones principales son:\n"
+        "Tus tres funciones principales son:\n"
         "1. Módulo Financiero: Permite registrar gastos, buscar transacciones pasadas y generar reportes en Excel.\n"
-        "2. Agenda y Calendario: Permite agendar eventos bloqueantes y verificar disponibilidad para fechas específicas.\n\n"
+        "2. Agenda y Calendario: Permite agendar eventos bloqueantes y verificar disponibilidad para fechas específicas.\n"
+        "3. Búsqueda Web: Permite consultar información en tiempo real o hechos de actualidad en internet cuando sea necesario.\n\n"
         "REGLAS IMPORTANTES:\n"
         "- Toda la persistencia de datos ocurre en una base de datos local SQLite y los archivos Excel se compilan localmente.\n"
         f"- La fecha y hora actual en el servidor es: {current_time_str}.\n"
         "- Cuando el usuario haga referencias temporales relativas (como 'hoy', 'mañana', 'el lunes', 'ayer'), debes calcular la fecha exacta en base a la hora actual indicada arriba antes de llamar a las herramientas.\n"
         "- Para agendar eventos, es OBLIGATORIO que uses el formato de fecha y hora 'YYYY-MM-DD HH:MM'. Si el usuario no te da la hora, asume una hora prudente o pregúntale, pero nunca envíes un formato inválido a la herramienta.\n"
         "- Si el usuario te pide un reporte de gastos, debes invocar la herramienta 'generate_expense_report'. El bot interceptará la llamada y le enviará el archivo. Confírmale que lo estás enviando.\n"
+        "- Si el usuario hace preguntas sobre hechos de actualidad, noticias recientes o cosas que requieran internet, invoca 'web_search'.\n"
         "- Responde siempre en español de manera formal, clara y concisa. Utiliza formato Markdown en tus respuestas escritas."
     )
 
@@ -210,12 +240,12 @@ def process_message_with_ai(user_id: int, user_message: str) -> tuple[str, list[
     response_message = response.choices[0].message
     pending_side_effects = []
     
-    # 2. Si el modelo solicita llamadas a herramientas
-    if response_message.tool_calls:
-        # Añadir la respuesta intermedia del asistente al historial de mensajes de la API
+    # Ciclo para resolver llamadas a herramientas de forma recursiva
+    while response_message.tool_calls:
+        # Añadir la respuesta intermedia al historial de la API
         messages.append(response_message)
         
-        # Procesar cada llamada de herramienta secuencialmente
+        # Procesar cada llamada a herramienta secuencialmente
         for tool_call in response_message.tool_calls:
             function_name = tool_call.function.name
             function_args = json.loads(tool_call.function.arguments)
@@ -233,13 +263,16 @@ def process_message_with_ai(user_id: int, user_message: str) -> tuple[str, list[
                 "content": tool_output
             })
             
-        # Segunda llamada a OpenRouter con los resultados de las herramientas
-        second_response = client.chat.completions.create(
+        # Llamar de nuevo a la API para enviar los resultados de las herramientas
+        # y verificar si requiere más llamadas o da la respuesta final
+        response = client.chat.completions.create(
             model=OPENROUTER_MODEL,
-            messages=messages
+            messages=messages,
+            tools=TOOLS
         )
-        final_text = second_response.choices[0].message.content
-    else:
-        final_text = response_message.content
+        response_message = response.choices[0].message
+
+    # Garantizar que final_text no sea None
+    final_text = response_message.content or "Procesamiento completado con éxito."
 
     return final_text, pending_side_effects

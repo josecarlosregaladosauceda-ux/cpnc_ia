@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asistente de IA - Panel de Control</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --glass-bg: rgba(17, 24, 39, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --primary: #8b5cf6; /* Violeta */
+            --primary-glow: rgba(139, 92, 246, 0.4);
+            --accent: #06b6d4; /* Cyan */
+            --accent-glow: rgba(6, 182, 212, 0.4);
+            --success: #10b981; /* Verde esmeralda */
+            --danger: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(at 10% 20%, rgba(139, 92, 246, 0.15) 0px, transparent 50%),
+                radial-gradient(at 90% 80%, rgba(6, 182, 212, 0.12) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 2rem 1.5rem;
+            line-height: 1.5;
+        }
+
+        /* Contenedor Principal */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Cabecera */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        header h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff 30%, var(--primary) 70%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .status-badge {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            color: var(--success);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.15);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--success);
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse 1.8s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.9); opacity: 0.4; }
+            50% { transform: scale(1.2); opacity: 1; box-shadow: 0 0 10px var(--success); }
+            100% { transform: scale(0.9); opacity: 0.4; }
+        }
+
+        /* Tarjetas de Estadísticas (Grid) */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--primary);
+        }
+
+        .card-cyan::before {
+            background: var(--accent);
+        }
+
+        .card-green::before {
+            background: var(--success);
+        }
+
+        .card-title {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .card-value {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .card-subtext {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        /* Dashboard Body (2 Columnas) */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1.6fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        @media (max-width: 900px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 1.75rem;
+            display: flex;
+            flex-direction: column;
+            max-height: 480px;
+        }
+
+        .panel-header {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-header span {
+            font-size: 0.8rem;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.25rem 0.75rem;
+            border-radius: 8px;
+            color: var(--text-secondary);
+            border: 1px solid var(--glass-border);
+        }
+
+        .scrollable-body {
+            overflow-y: auto;
+            flex: 1;
+            padding-right: 0.5rem;
+        }
+
+        /* Scrollbar personalizado */
+        .scrollable-body::-webkit-scrollbar {
+            width: 6px;
+        }
+        .scrollable-body::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .scrollable-body::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        .scrollable-body::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Tablas */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            padding: 0.75rem 0.5rem;
+            border-bottom: 1px solid var(--glass-border);
+            font-weight: 600;
+        }
+
+        td {
+            padding: 0.85rem 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            font-size: 0.9rem;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .td-amount {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            color: var(--accent);
+            text-align: right;
+        }
+
+        .td-category {
+            display: inline-block;
+            background: rgba(139, 92, 246, 0.12);
+            color: #c084fc;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            font-size: 0.75rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 6px;
+            text-transform: capitalize;
+        }
+
+        /* Agenda / Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 1.5rem;
+            border-left: 1px dashed rgba(255, 255, 255, 0.15);
+            margin-left: 0.5rem;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        .timeline-item:last-child {
+            margin-bottom: 0.5rem;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: calc(-1.5rem - 4.5px);
+            top: 5px;
+            width: 8px;
+            height: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--accent);
+        }
+
+        .timeline-time {
+            font-size: 0.75rem;
+            color: var(--accent);
+            font-weight: 600;
+            margin-bottom: 0.2rem;
+            display: block;
+        }
+
+        .timeline-title {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        /* Log de Chat Completo */
+        .log-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 1.75rem;
+            max-height: 400px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-bubble {
+            margin-bottom: 1rem;
+            display: flex;
+            flex-direction: column;
+            max-width: 85%;
+            padding: 0.85rem 1.1rem;
+            border-radius: 14px;
+            font-size: 0.9rem;
+            position: relative;
+        }
+
+        .bubble-user {
+            background: rgba(255, 255, 255, 0.05);
+            align-self: flex-end;
+            border-bottom-right-radius: 2px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .bubble-assistant {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(6, 182, 212, 0.05) 100%);
+            align-self: flex-start;
+            border-bottom-left-radius: 2px;
+            border: 1px solid rgba(139, 92, 246, 0.15);
+        }
+
+        .bubble-meta {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            margin-top: 0.35rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .bubble-author {
+            font-weight: 600;
+            margin-right: 1rem;
+        }
+
+        .bubble-user .bubble-author {
+            color: var(--accent);
+        }
+
+        .bubble-assistant .bubble-author {
+            color: var(--primary);
+        }
+
+        .empty-state {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Cabecera -->
+        <header>
+            <div>
+                <h1>Asistente IA Privado</h1>
+                <p style="color: var(--text-secondary); font-size: 0.9rem;">Servidor Perimetral Local (begonia)</p>
+            </div>
+            <div class="status-badge">
+                <span class="status-dot"></span>
+                <span>Servidor Activo</span>
+            </div>
+        </header>
+
+        <!-- KPI Grid -->
+        <section class="stats-grid">
+            <div class="card">
+                <div class="card-title">Módulo Financiero</div>
+                <div class="card-value" id="stat-expenses-total">$0.00</div>
+                <div class="card-subtext" id="stat-expenses-count">0 gastos registrados</div>
+            </div>
+            <div class="card card-cyan">
+                <div class="card-title">Agenda y Calendario</div>
+                <div class="card-value" id="stat-calendar-count">0</div>
+                <div class="card-subtext">Eventos agendados en total</div>
+            </div>
+            <div class="card card-green">
+                <div class="card-title">Memoria de Chat</div>
+                <div class="card-value" id="stat-chat-count">0</div>
+                <div class="card-subtext">Mensajes en historial de SQLite</div>
+            </div>
+        </section>
+
+        <!-- Grid Principal -->
+        <div class="main-grid">
+            <!-- Tabla de Gastos -->
+            <div class="panel">
+                <div class="panel-header">
+                    Gastos Recientes
+                    <span id="label-expenses-count">Últimos registros</span>
+                </div>
+                <div class="scrollable-body">
+                    <table id="table-expenses">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Categoría</th>
+                                <th>Concepto</th>
+                                <th style="text-align: right;">Monto</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Se carga dinámicamente -->
+                        </tbody>
+                    </table>
+                    <div class="empty-state" id="expenses-empty" style="display: none;">No hay gastos registrados aún.</div>
+                </div>
+            </div>
+
+            <!-- Agenda / Timeline -->
+            <div class="panel">
+                <div class="panel-header">
+                    Agenda y Calendario
+                    <span>Próximos eventos</span>
+                </div>
+                <div class="scrollable-body">
+                    <div class="timeline" id="timeline-calendar">
+                        <!-- Se carga dinámicamente -->
+                    </div>
+                    <div class="empty-state" id="calendar-empty" style="display: none;">No hay eventos en la agenda.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Log Monitor -->
+        <section class="log-panel">
+            <div class="panel-header">
+                Consola del Chat (Memoria en SQLite)
+                <span>Últimas interacciones</span>
+            </div>
+            <div class="scrollable-body" id="chat-logs-container" style="display: flex; flex-direction: column;">
+                <!-- Se carga dinámicamente -->
+            </div>
+        </section>
+    </div>
+
+    <!-- Script de carga dinámica AJAX -->
+    <script>
+        async function fetchStats() {
+            try {
+                const response = await fetch('/api/stats');
+                const data = await response.json();
+                if (data.db_connected) {
+                    document.getElementById('stat-expenses-total').innerText = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(data.expenses.total);
+                    document.getElementById('stat-expenses-count').innerText = `${data.expenses.count} gastos registrados`;
+                    document.getElementById('stat-calendar-count').innerText = data.calendar.count;
+                    document.getElementById('stat-chat-count').innerText = data.chat_messages_count;
+                }
+            } catch (err) {
+                console.error("Error al obtener estadísticas:", err);
+            }
+        }
+
+        async function fetchExpenses() {
+            try {
+                const response = await fetch('/api/expenses');
+                const data = await response.json();
+                const tbody = document.querySelector('#table-expenses tbody');
+                tbody.innerHTML = '';
+                
+                if (data.length === 0) {
+                    document.getElementById('expenses-empty').style.display = 'flex';
+                    document.getElementById('table-expenses').style.display = 'none';
+                } else {
+                    document.getElementById('expenses-empty').style.display = 'none';
+                    document.getElementById('table-expenses').style.display = 'table';
+                    
+                    data.forEach(item => {
+                        const tr = document.createElement('tr');
+                        
+                        // Formatear fecha
+                        const date = new Date(item.date_added);
+                        const dateFormatted = date.toLocaleDateString('es-MX', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                        
+                        tr.innerHTML = `
+                            <td style="color: var(--text-secondary); font-size: 0.8rem;">${dateFormatted}</td>
+                            <td><span class="td-category">${item.category}</span></td>
+                            <td style="font-weight: 500;">${item.concept}</td>
+                            <td class="td-amount">${new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(item.amount)}</td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+            } catch (err) {
+                console.error("Error al obtener gastos:", err);
+            }
+        }
+
+        async function fetchCalendar() {
+            try {
+                const response = await fetch('/api/calendar');
+                const data = await response.json();
+                const container = document.getElementById('timeline-calendar');
+                container.innerHTML = '';
+                
+                if (data.length === 0) {
+                    document.getElementById('calendar-empty').style.display = 'flex';
+                    container.style.display = 'none';
+                } else {
+                    document.getElementById('calendar-empty').style.display = 'none';
+                    container.style.display = 'block';
+                    
+                    data.forEach(item => {
+                        const div = document.createElement('div');
+                        div.className = 'timeline-item';
+                        div.innerHTML = `
+                            <div class="timeline-dot"></div>
+                            <span class="timeline-time">${item.start_time}</span>
+                            <span class="timeline-title">${item.title}</span>
+                        `;
+                        container.appendChild(div);
+                    });
+                }
+            } catch (err) {
+                console.error("Error al obtener agenda:", err);
+            }
+        }
+
+        async function fetchChatLogs() {
+            try {
+                const response = await fetch('/api/logs');
+                const data = await response.json();
+                const container = document.getElementById('chat-logs-container');
+                container.innerHTML = '';
+                
+                if (data.length === 0) {
+                    container.innerHTML = '<div class="empty-state">No hay mensajes registrados en el chat.</div>';
+                } else {
+                    // Ordenar por ID ascendente para mostrar en formato chat clásico (arriba el más viejo)
+                    const reversedData = [...data].reverse();
+                    
+                    reversedData.forEach(msg => {
+                        if (msg.content === "Asistente inicializado.") return; // Omitir logs internos de inicio
+                        
+                        const bubble = document.createElement('div');
+                        const isUser = msg.role === 'user';
+                        bubble.className = `chat-bubble ${isUser ? 'bubble-user' : 'bubble-assistant'}`;
+                        
+                        // Parsear fecha
+                        const date = new Date(msg.timestamp);
+                        const timeStr = date.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+                        
+                        bubble.innerHTML = `
+                            <div>${msg.content}</div>
+                            <div class="bubble-meta">
+                                <span class="bubble-author">${isUser ? 'Tú' : 'IA'}</span>
+                                <span>${timeStr}</span>
+                            </div>
+                        `;
+                        container.appendChild(bubble);
+                    });
+                    
+                    // Hacer scroll automático al fondo del log
+                    container.scrollTop = container.scrollHeight;
+                }
+            } catch (err) {
+                console.error("Error al obtener logs de chat:", err);
+            }
+        }
+
+        // Cargar todo al inicio
+        function refreshDashboard() {
+            fetchStats();
+            fetchExpenses();
+            fetchCalendar();
+            fetchChatLogs();
+        }
+
+        refreshDashboard();
+        
+        // Actualizar cada 5 segundos de forma automática y transparente
+        setInterval(refreshDashboard, 5000);
+    </script>
+</body>
+</html>
