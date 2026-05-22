@@ -1,6 +1,6 @@
 import sqlite3
 import contextlib
-from datetime import datetime
+from datetime import datetime, timedelta
 from src.config import DB_PATH
 
 def get_connection():
@@ -37,15 +37,35 @@ def init_db():
             )
         """)
         
+        # Tabla para registro de ingresos (módulo financiero)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS income (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                category TEXT NOT NULL,
+                concept TEXT NOT NULL,
+                amount REAL NOT NULL,
+                date_added DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        
         # Tabla para agenda y calendario (módulo de agenda)
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS calendar (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 title TEXT NOT NULL,
                 start_time TEXT NOT NULL, -- Formato: YYYY-MM-DD HH:MM
-                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                notified INTEGER DEFAULT 0
             )
         """)
+        
+        # Migración: Agregar columna notified si no existe en base de datos existente
+        try:
+            cursor.execute("ALTER TABLE calendar ADD COLUMN notified INTEGER DEFAULT 0")
+        except sqlite3.OperationalError:
+            # La columna ya existe
+            pass
+            
         conn.commit()
 
 # --- MÉTODOS DE MEMORIA DE CHAT ---
@@ -126,6 +146,119 @@ def get_all_expenses() -> list:
         rows = cursor.fetchall()
         return [dict(row) for row in rows]
 
+def add_income(category: str, concept: str, amount: float) -> str:
+    """
+    Registra un ingreso en la base de datos.
+    Normaliza la categoría a minúsculas y elimina espacios extras.
+    """
+    clean_category = category.strip().lower()
+    clean_concept = concept.strip()
+    
+    with contextlib.closing(get_connection()) as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO income (category, concept, amount) VALUES (?, ?, ?)",
+            (clean_category, clean_concept, float(amount))
+        )
+        conn.commit()
+        
+    return f"Ingreso registrado con éxito: {clean_concept} (${amount:.2f}) en la categoría '{clean_category}'."
+
+def search_income(keyword: str) -> list:
+    """
+    Busca ingresos utilizando similitud (LIKE) en el concepto o la categoría.
+    Retorna una lista de diccionarios con el detalle de las transacciones.
+    """
+    query_param = f"%{keyword.strip()}%"
+    with contextlib.closing(get_connection()) as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            SELECT date_added, category, concept, amount 
+            FROM income 
+            WHERE concept LIKE ? OR category LIKE ? 
+            ORDER BY date_added DESC
+            """,
+            (query_param, query_param)
+        )
+        rows = cursor.fetchall()
+        return [dict(row) for row in rows]
+
+def get_all_income() -> list:
+    """Retorna todos los ingresos registrados en la base de datos."""
+    with contextlib.closing(get_connection()) as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT category, concept, amount, date_added FROM income ORDER BY date_added ASC")
+        rows = cursor.fetchall()
+        return [dict(row) for row in rows]
+
+def get_financial_summary() -> dict:
+    """
+    Calcula el resumen financiero histórico y del período dinámico.
+    El período se inicia en la fecha del último ingreso (máximo 10 días atrás).
+    Si no hay ingresos recientes, inicia hace 7 días.
+    """
+    # SQLite CURRENT_TIMESTAMP usa UTC
+    now_utc = datetime.utcnow()
+    
+    with contextlib.closing(get_connection()) as conn:
+        cursor = conn.cursor()
+        
+        # 1. Buscar el último ingreso registrado
+        cursor.execute("SELECT amount, date_added FROM income ORDER BY date_added DESC, id DESC LIMIT 1")
+        last_inc = cursor.fetchone()
+        
+        start_date = now_utc - timedelta(days=7)
+        last_deposit_date = None
+        last_deposit_amount = 0.0
+        
+        if last_inc:
+            last_deposit_amount = float(last_inc["amount"])
+            date_str = last_inc["date_added"]
+            try:
+                if len(date_str) > 10:
+                    dt_inc = datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
+                else:
+                    dt_inc = datetime.strptime(date_str, "%Y-%m-%d")
+                
+                diff = now_utc - dt_inc
+                last_deposit_date = date_str
+                
+                # Límite superior: no más de 10 días atrás (semana y media)
+                if diff.days <= 10:
+                    start_date = dt_inc
+            except ValueError:
+                pass
+                
+        start_date_str = start_date.strftime("%Y-%m-%d %H:%M:%S")
+        
+        # 2. Calcular ingresos del período (desde start_date_str)
+        cursor.execute("SELECT SUM(amount) FROM income WHERE date_added >= ?", (start_date_str,))
+        p_inc = cursor.fetchone()[0] or 0.0
+        
+        # 3. Calcular gastos del período (desde start_date_str)
+        cursor.execute("SELECT SUM(amount) FROM expenses WHERE date_added >= ?", (start_date_str,))
+        p_exp = cursor.fetchone()[0] or 0.0
+        
+        # 4. Calcular totales históricos
+        cursor.execute("SELECT SUM(amount) FROM income")
+        h_inc = cursor.fetchone()[0] or 0.0
+        
+        cursor.execute("SELECT SUM(amount) FROM expenses")
+        h_exp = cursor.fetchone()[0] or 0.0
+        
+    return {
+        "start_date": start_date_str,
+        "period_income": float(p_inc),
+        "period_expenses": float(p_exp),
+        "period_balance": float(p_inc - p_exp),
+        "net_balance": float(h_inc - h_exp),
+        "total_income": float(h_inc),
+        "total_expenses": float(h_exp),
+        "last_deposit_date": last_deposit_date,
+        "last_deposit_amount": last_deposit_amount
+    }
+
 # --- MÉTODOS DE MÓDULO DE AGENDA ---
 
 def add_calendar_event(title: str, start_time: str) -> str:
@@ -173,3 +306,4 @@ def check_availability(date_str: str) -> list:
         )
         rows = cursor.fetchall()
         return [dict(row) for row in rows]
+

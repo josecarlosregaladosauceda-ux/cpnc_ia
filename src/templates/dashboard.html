@@ -18,7 +18,7 @@
             --accent: #06b6d4; /* Cyan */
             --accent-glow: rgba(6, 182, 212, 0.4);
             --success: #10b981; /* Verde esmeralda */
-            --danger: #ef4444;
+            --danger: #ef4444; /* Rojo */
         }
 
         * {
@@ -97,8 +97,8 @@
         /* Tarjetas de Estadísticas (Grid) */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.25rem;
             margin-bottom: 2.5rem;
         }
 
@@ -108,7 +108,7 @@
             -webkit-backdrop-filter: blur(16px);
             border: 1px solid var(--glass-border);
             border-radius: 16px;
-            padding: 1.5rem;
+            padding: 1.25rem;
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
@@ -138,31 +138,39 @@
             background: var(--success);
         }
 
+        .card-red::before {
+            background: var(--danger);
+        }
+
+        .card-yellow::before {
+            background: #f59e0b;
+        }
+
         .card-title {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             text-transform: uppercase;
             letter-spacing: 0.05em;
             color: var(--text-secondary);
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.4rem;
             font-weight: 600;
         }
 
         .card-value {
             font-family: 'Outfit', sans-serif;
-            font-size: 2rem;
+            font-size: 1.75rem;
             font-weight: 700;
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.2rem;
         }
 
         .card-subtext {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: var(--text-secondary);
         }
 
         /* Dashboard Body (2 Columnas) */
         .main-grid {
             display: grid;
-            grid-template-columns: 1.6fr 1fr;
+            grid-template-columns: 1.5fr 1fr;
             gap: 1.5rem;
             margin-bottom: 2.5rem;
         }
@@ -178,26 +186,26 @@
             backdrop-filter: blur(16px);
             border: 1px solid var(--glass-border);
             border-radius: 20px;
-            padding: 1.75rem;
+            padding: 1.5rem;
             display: flex;
             flex-direction: column;
-            max-height: 480px;
+            height: 380px;
         }
 
         .panel-header {
             font-family: 'Outfit', sans-serif;
-            font-size: 1.3rem;
+            font-size: 1.25rem;
             font-weight: 600;
-            margin-bottom: 1.25rem;
+            margin-bottom: 1rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
         .panel-header span {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             background: rgba(255, 255, 255, 0.05);
-            padding: 0.25rem 0.75rem;
+            padding: 0.2rem 0.6rem;
             border-radius: 8px;
             color: var(--text-secondary);
             border: 1px solid var(--glass-border);
@@ -232,29 +240,36 @@
         }
 
         th {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 0.05em;
             color: var(--text-secondary);
-            padding: 0.75rem 0.5rem;
+            padding: 0.6rem 0.4rem;
             border-bottom: 1px solid var(--glass-border);
             font-weight: 600;
         }
 
         td {
-            padding: 0.85rem 0.5rem;
+            padding: 0.7rem 0.4rem;
             border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
 
         tr:last-child td {
             border-bottom: none;
         }
 
-        .td-amount {
+        .td-amount-expense {
             font-family: 'Outfit', sans-serif;
             font-weight: 600;
-            color: var(--accent);
+            color: #f43f5e; /* Rojo suave */
+            text-align: right;
+        }
+
+        .td-amount-income {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            color: var(--success); /* Verde */
             text-align: right;
         }
 
@@ -263,8 +278,19 @@
             background: rgba(139, 92, 246, 0.12);
             color: #c084fc;
             border: 1px solid rgba(139, 92, 246, 0.2);
-            font-size: 0.75rem;
-            padding: 0.15rem 0.5rem;
+            font-size: 0.7rem;
+            padding: 0.1rem 0.4rem;
+            border-radius: 6px;
+            text-transform: capitalize;
+        }
+
+        .td-category-income {
+            display: inline-block;
+            background: rgba(16, 185, 129, 0.12);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            font-size: 0.7rem;
+            padding: 0.1rem 0.4rem;
             border-radius: 6px;
             text-transform: capitalize;
         }
@@ -279,7 +305,7 @@
 
         .timeline-item {
             position: relative;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.25rem;
         }
 
         .timeline-item:last-child {
@@ -301,12 +327,12 @@
             font-size: 0.75rem;
             color: var(--accent);
             font-weight: 600;
-            margin-bottom: 0.2rem;
+            margin-bottom: 0.15rem;
             display: block;
         }
 
         .timeline-title {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: 500;
         }
 
@@ -316,20 +342,20 @@
             backdrop-filter: blur(16px);
             border: 1px solid var(--glass-border);
             border-radius: 20px;
-            padding: 1.75rem;
-            max-height: 400px;
+            padding: 1.5rem;
+            max-height: 350px;
             display: flex;
             flex-direction: column;
         }
 
         .chat-bubble {
-            margin-bottom: 1rem;
+            margin-bottom: 0.75rem;
             display: flex;
             flex-direction: column;
             max-width: 85%;
-            padding: 0.85rem 1.1rem;
+            padding: 0.75rem 1rem;
             border-radius: 14px;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             position: relative;
         }
 
@@ -348,9 +374,9 @@
         }
 
         .bubble-meta {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             color: var(--text-secondary);
-            margin-top: 0.35rem;
+            margin-top: 0.3rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -375,7 +401,7 @@
             align-items: center;
             height: 100%;
             color: var(--text-secondary);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-style: italic;
         }
     </style>
@@ -396,51 +422,103 @@
 
         <!-- KPI Grid -->
         <section class="stats-grid">
-            <div class="card">
-                <div class="card-title">Módulo Financiero</div>
+            <div class="card card-green">
+                <div class="card-title">Total Ingresos</div>
+                <div class="card-value" id="stat-income-total">$0.00</div>
+                <div class="card-subtext" id="stat-income-count">0 ingresos</div>
+            </div>
+            <div class="card card-red">
+                <div class="card-title">Total Gastos</div>
                 <div class="card-value" id="stat-expenses-total">$0.00</div>
-                <div class="card-subtext" id="stat-expenses-count">0 gastos registrados</div>
+                <div class="card-subtext" id="stat-expenses-count">0 gastos</div>
+            </div>
+            <div class="card" id="card-net-balance">
+                <div class="card-title">Balance Neto</div>
+                <div class="card-value" id="stat-net-balance">$0.00</div>
+                <div class="card-subtext" id="stat-net-balance-sub">Calculando...</div>
+            </div>
+            <div class="card" id="card-period-balance">
+                <div class="card-title">Balance Período</div>
+                <div class="card-value" id="stat-period-balance">$0.00</div>
+                <div class="card-subtext" id="stat-period-sub">Depósito inicial: $0.00</div>
+            </div>
+            <div class="card" id="card-period-budget">
+                <div class="card-title">Consumo de Presupuesto</div>
+                <div class="card-value" id="stat-period-percent">0%</div>
+                <div class="progress-bar-container" style="width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 4px; margin-top: 0.5rem; overflow: hidden;">
+                    <div id="stat-period-progress-bar" style="width: 0%; height: 100%; background: var(--success); transition: width 0.5s ease, background-color 0.5s ease;"></div>
+                </div>
+                <div class="card-subtext" id="stat-period-budget-sub" style="margin-top: 0.3rem;">Gastos del ciclo: $0.00</div>
             </div>
             <div class="card card-cyan">
-                <div class="card-title">Agenda y Calendario</div>
+                <div class="card-title">Calendario</div>
                 <div class="card-value" id="stat-calendar-count">0</div>
-                <div class="card-subtext">Eventos agendados en total</div>
+                <div class="card-subtext">Eventos programados</div>
             </div>
-            <div class="card card-green">
-                <div class="card-title">Memoria de Chat</div>
+            <div class="card">
+                <div class="card-title">Consola de Chat</div>
                 <div class="card-value" id="stat-chat-count">0</div>
-                <div class="card-subtext">Mensajes en historial de SQLite</div>
+                <div class="card-subtext">Mensajes en memoria</div>
             </div>
         </section>
 
         <!-- Grid Principal -->
         <div class="main-grid">
-            <!-- Tabla de Gastos -->
-            <div class="panel">
-                <div class="panel-header">
-                    Gastos Recientes
-                    <span id="label-expenses-count">Últimos registros</span>
+            <!-- Columna Izquierda: Finanzas (Gastos e Ingresos apilados) -->
+            <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                
+                <!-- Tabla de Gastos -->
+                <div class="panel">
+                    <div class="panel-header">
+                        Gastos Recientes
+                        <span id="label-expenses-count">Gastos</span>
+                    </div>
+                    <div class="scrollable-body">
+                        <table id="table-expenses">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Categoría</th>
+                                    <th>Concepto</th>
+                                    <th style="text-align: right;">Monto</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Se carga dinámicamente -->
+                            </tbody>
+                        </table>
+                        <div class="empty-state" id="expenses-empty" style="display: none;">No hay gastos registrados aún.</div>
+                    </div>
                 </div>
-                <div class="scrollable-body">
-                    <table id="table-expenses">
-                        <thead>
-                            <tr>
-                                <th>Fecha</th>
-                                <th>Categoría</th>
-                                <th>Concepto</th>
-                                <th style="text-align: right;">Monto</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Se carga dinámicamente -->
-                        </tbody>
-                    </table>
-                    <div class="empty-state" id="expenses-empty" style="display: none;">No hay gastos registrados aún.</div>
+
+                <!-- Tabla de Ingresos -->
+                <div class="panel">
+                    <div class="panel-header">
+                        Ingresos Recientes
+                        <span id="label-income-count">Ingresos</span>
+                    </div>
+                    <div class="scrollable-body">
+                        <table id="table-income">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Categoría</th>
+                                    <th>Concepto</th>
+                                    <th style="text-align: right;">Monto</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Se carga dinámicamente -->
+                            </tbody>
+                        </table>
+                        <div class="empty-state" id="income-empty" style="display: none;">No hay ingresos registrados aún.</div>
+                    </div>
                 </div>
+
             </div>
 
-            <!-- Agenda / Timeline -->
-            <div class="panel">
+            <!-- Columna Derecha: Agenda y Calendario -->
+            <div class="panel" style="height: 100%; max-height: none;">
                 <div class="panel-header">
                     Agenda y Calendario
                     <span>Próximos eventos</span>
@@ -473,8 +551,87 @@
                 const response = await fetch('/api/stats');
                 const data = await response.json();
                 if (data.db_connected) {
+                    // Actualizar ingresos
+                    document.getElementById('stat-income-total').innerText = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(data.income.total);
+                    document.getElementById('stat-income-count').innerText = `${data.income.count} ingresos registrados`;
+                    
+                    // Actualizar gastos
                     document.getElementById('stat-expenses-total').innerText = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(data.expenses.total);
                     document.getElementById('stat-expenses-count').innerText = `${data.expenses.count} gastos registrados`;
+                    
+                    // Actualizar balance
+                    const netVal = data.net_balance;
+                    const netEl = document.getElementById('stat-net-balance');
+                    netEl.innerText = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(netVal);
+                    
+                    const netSub = document.getElementById('stat-net-balance-sub');
+                    const cardNet = document.getElementById('card-net-balance');
+                    if (netVal >= 0) {
+                        netEl.style.color = 'var(--success)';
+                        netSub.innerText = 'Saldo a favor';
+                        cardNet.className = 'card card-green';
+                    } else {
+                        netEl.style.color = 'var(--danger)';
+                        netSub.innerText = 'Déficit financiero';
+                        cardNet.className = 'card card-red';
+                    }
+                    
+                    // Actualizar métricas del período dinámico
+                    const fSum = data.financial_summary;
+                    if (fSum) {
+                        const pInc = fSum.period_income;
+                        const pExp = fSum.period_expenses;
+                        const pBal = fSum.period_balance;
+                        const startDateStr = fSum.start_date;
+                        const lastDepAmount = fSum.last_deposit_amount;
+                        const lastDepDate = fSum.last_deposit_date;
+                        
+                        let startDesc = 'Ciclo de 7 días';
+                        if (lastDepDate) {
+                            const dateObj = new Date(lastDepDate);
+                            const day = dateObj.toLocaleDateString('es-MX', { day: 'numeric', month: 'short' });
+                            startDesc = `Depósito del ${day}`;
+                        }
+                        
+                        const pBalEl = document.getElementById('stat-period-balance');
+                        pBalEl.innerText = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(pBal);
+                        document.getElementById('stat-period-sub').innerText = `${startDesc}: ${new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(lastDepAmount)}`;
+                        
+                        let pct = 0;
+                        if (pInc > 0) {
+                            pct = Math.min(100, (pExp / pInc) * 100);
+                        } else if (pExp > 0) {
+                            pct = 100;
+                        }
+                        
+                        document.getElementById('stat-period-percent').innerText = `${pct.toFixed(1)}%`;
+                        document.getElementById('stat-period-budget-sub').innerText = `Gastos del ciclo: ${new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(pExp)}`;
+                        
+                        const barEl = document.getElementById('stat-period-progress-bar');
+                        barEl.style.width = `${pct}%`;
+                        
+                        const cardPeriodBal = document.getElementById('card-period-balance');
+                        const cardPeriodBud = document.getElementById('card-period-budget');
+                        
+                        if (pct <= 50) {
+                            pBalEl.style.color = 'var(--success)';
+                            barEl.style.backgroundColor = 'var(--success)';
+                            cardPeriodBal.className = 'card card-green';
+                            cardPeriodBud.className = 'card card-green';
+                        } else if (pct <= 85) {
+                            pBalEl.style.color = '#f59e0b';
+                            barEl.style.backgroundColor = '#f59e0b';
+                            cardPeriodBal.className = 'card card-yellow';
+                            cardPeriodBud.className = 'card card-yellow';
+                        } else {
+                            pBalEl.style.color = 'var(--danger)';
+                            barEl.style.backgroundColor = 'var(--danger)';
+                            cardPeriodBal.className = 'card card-red';
+                            cardPeriodBud.className = 'card card-red';
+                        }
+                    }
+                    
+                    // Agenda y chat
                     document.getElementById('stat-calendar-count').innerText = data.calendar.count;
                     document.getElementById('stat-chat-count').innerText = data.chat_messages_count;
                 }
@@ -499,8 +656,6 @@
                     
                     data.forEach(item => {
                         const tr = document.createElement('tr');
-                        
-                        // Formatear fecha
                         const date = new Date(item.date_added);
                         const dateFormatted = date.toLocaleDateString('es-MX', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
                         
@@ -508,13 +663,46 @@
                             <td style="color: var(--text-secondary); font-size: 0.8rem;">${dateFormatted}</td>
                             <td><span class="td-category">${item.category}</span></td>
                             <td style="font-weight: 500;">${item.concept}</td>
-                            <td class="td-amount">${new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(item.amount)}</td>
+                            <td class="td-amount-expense">-${new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(item.amount)}</td>
                         `;
                         tbody.appendChild(tr);
                     });
                 }
             } catch (err) {
                 console.error("Error al obtener gastos:", err);
+            }
+        }
+
+        async function fetchIncome() {
+            try {
+                const response = await fetch('/api/income');
+                const data = await response.json();
+                const tbody = document.querySelector('#table-income tbody');
+                tbody.innerHTML = '';
+                
+                if (data.length === 0) {
+                    document.getElementById('income-empty').style.display = 'flex';
+                    document.getElementById('table-income').style.display = 'none';
+                } else {
+                    document.getElementById('income-empty').style.display = 'none';
+                    document.getElementById('table-income').style.display = 'table';
+                    
+                    data.forEach(item => {
+                        const tr = document.createElement('tr');
+                        const date = new Date(item.date_added);
+                        const dateFormatted = date.toLocaleDateString('es-MX', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                        
+                        tr.innerHTML = `
+                            <td style="color: var(--text-secondary); font-size: 0.8rem;">${dateFormatted}</td>
+                            <td><span class="td-category-income">${item.category}</span></td>
+                            <td style="font-weight: 500;">${item.concept}</td>
+                            <td class="td-amount-income">+${new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(item.amount)}</td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+            } catch (err) {
+                console.error("Error al obtener ingresos:", err);
             }
         }
 
@@ -558,17 +746,15 @@
                 if (data.length === 0) {
                     container.innerHTML = '<div class="empty-state">No hay mensajes registrados en el chat.</div>';
                 } else {
-                    // Ordenar por ID ascendente para mostrar en formato chat clásico (arriba el más viejo)
                     const reversedData = [...data].reverse();
                     
                     reversedData.forEach(msg => {
-                        if (msg.content === "Asistente inicializado.") return; // Omitir logs internos de inicio
+                        if (msg.content === "Asistente inicializado.") return;
                         
                         const bubble = document.createElement('div');
                         const isUser = msg.role === 'user';
                         bubble.className = `chat-bubble ${isUser ? 'bubble-user' : 'bubble-assistant'}`;
                         
-                        // Parsear fecha
                         const date = new Date(msg.timestamp);
                         const timeStr = date.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
                         
@@ -582,7 +768,6 @@
                         container.appendChild(bubble);
                     });
                     
-                    // Hacer scroll automático al fondo del log
                     container.scrollTop = container.scrollHeight;
                 }
             } catch (err) {
@@ -594,13 +779,14 @@
         function refreshDashboard() {
             fetchStats();
             fetchExpenses();
+            fetchIncome();
             fetchCalendar();
             fetchChatLogs();
         }
 
         refreshDashboard();
         
-        // Actualizar cada 5 segundos de forma automática y transparente
+        // Actualizar cada 5 segundos de forma automática
         setInterval(refreshDashboard, 5000);
     </script>
 </body>

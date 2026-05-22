@@ -18,6 +18,9 @@ def home():
 def api_stats():
     """Retorna estadísticas generales del sistema, base de datos y memoria."""
     try:
+        # Obtener resumen financiero dinámico e histórico
+        summary = db.get_financial_summary()
+        
         with db.get_connection() as conn:
             cursor = conn.cursor()
             
@@ -25,11 +28,13 @@ def api_stats():
             cursor.execute("SELECT COUNT(*) FROM chat_memory")
             chat_count = cursor.fetchone()[0]
             
-            # Cantidad de gastos y monto total gastado
-            cursor.execute("SELECT COUNT(*), SUM(amount) FROM expenses")
-            row = cursor.fetchone()
-            expenses_count = row[0] or 0
-            expenses_total = row[1] or 0.0
+            # Cantidad de gastos
+            cursor.execute("SELECT COUNT(*) FROM expenses")
+            expenses_count = cursor.fetchone()[0] or 0
+            
+            # Cantidad de ingresos
+            cursor.execute("SELECT COUNT(*) FROM income")
+            income_count = cursor.fetchone()[0] or 0
             
             # Cantidad de eventos programados
             cursor.execute("SELECT COUNT(*) FROM calendar")
@@ -41,8 +46,14 @@ def api_stats():
             "chat_messages_count": chat_count,
             "expenses": {
                 "count": expenses_count,
-                "total": float(expenses_total)
+                "total": summary["total_expenses"]
             },
+            "income": {
+                "count": income_count,
+                "total": summary["total_income"]
+            },
+            "net_balance": summary["net_balance"],
+            "financial_summary": summary,
             "calendar": {
                 "count": calendar_count
             }
@@ -67,6 +78,22 @@ def api_expenses():
             
         expenses_list = [dict(row) for row in rows]
         return jsonify(expenses_list)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/income')
+def api_income():
+    """Retorna los últimos 50 ingresos registrados."""
+    try:
+        with db.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT category, concept, amount, date_added FROM income ORDER BY date_added DESC LIMIT 50"
+            )
+            rows = cursor.fetchall()
+            
+        income_list = [dict(row) for row in rows]
+        return jsonify(income_list)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
